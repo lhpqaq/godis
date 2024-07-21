@@ -578,6 +578,6 @@ func init() {
 		attachCommandExtra([]string{redisFlagWrite, redisFlagDenyOOM, redisFlagFast}, 1, 1, 1)
 	registerCommand("HRandField", execHRandField, readFirstKey, nil, -2, flagReadOnly).
 		attachCommandExtra([]string{redisFlagRandom, redisFlagReadonly}, 1, 1, 1)
-	registerCommand("HScan", execHScan, readAllKeys, nil, -2, flagReadOnly).
+	registerCommand("HScan", execHScan, readFirstKey, nil, -2, flagReadOnly).
 		attachCommandExtra([]string{redisFlagReadonly, redisFlagSortForScript}, 1, 1, 1)
 }

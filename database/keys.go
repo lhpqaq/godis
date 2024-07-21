@@ -1,6 +1,11 @@
 package database
 
 import (
+	"math"
+	"strconv"
+	"strings"
+	"time"
+
 	"github.com/hdt3213/godis/aof"
 	"github.com/hdt3213/godis/datastruct/dict"
 	"github.com/hdt3213/godis/datastruct/list"
@@ -10,10 +15,6 @@ import (
 	"github.com/hdt3213/godis/lib/utils"
 	"github.com/hdt3213/godis/lib/wildcard"
 	"github.com/hdt3213/godis/redis/protocol"
-	"math"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // execDel removes a key from db
@@ -505,6 +506,6 @@ func init() {
 		attachCommandExtra([]string{redisFlagWrite, redisFlagFast}, 1, 1, 1)
 	registerCommand("Keys", execKeys, noPrepare, nil, 2, flagReadOnly).
 		attachCommandExtra([]string{redisFlagReadonly, redisFlagSortForScript}, 1, 1, 1)
-	registerCommand("Scan", execScan, readAllKeys, nil, -2, flagReadOnly).
+	registerCommand("Scan", execScan, noPrepare, nil, -2, flagReadOnly).
 		attachCommandExtra([]string{redisFlagReadonly, redisFlagSortForScript}, 1, 1, 1)
 }
