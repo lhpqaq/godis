@@ -390,6 +390,7 @@ func execSScan(db *DB, args [][]byte) redis.Reply {
 	if err != nil {
 		return protocol.MakeErrReply("ERR invalid cursor")
 	}
+
 	keysReply, nextCursor := set.SetScan(cursor, count, pattern)
 	if nextCursor < 0 {
 		return protocol.MakeErrReply("Invalid argument")
