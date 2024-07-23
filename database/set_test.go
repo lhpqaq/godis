@@ -1,12 +1,13 @@
 package database
 
 import (
-	"github.com/hdt3213/godis/lib/utils"
-	"github.com/hdt3213/godis/redis/protocol"
-	"github.com/hdt3213/godis/redis/protocol/asserts"
 	"math/rand"
 	"strconv"
 	"testing"
+
+	"github.com/hdt3213/godis/lib/utils"
+	"github.com/hdt3213/godis/redis/protocol"
+	"github.com/hdt3213/godis/redis/protocol/asserts"
 )
 
 // basic add get and remove
@@ -247,4 +248,41 @@ func TestSRandMember(t *testing.T) {
 
 	result = testDB.Exec(nil, utils.ToCmdLine("SRandMember", key, "-110"))
 	asserts.AssertMultiBulkReplySize(t, result, 110)
+}
+
+func TestSScan(t *testing.T) {
+	testDB.Flush()
+	setKey := "test:set"
+	for i := 0; i < 3; i++ {
+		key := string(rune(i))
+		testDB.Exec(nil, utils.ToCmdLine("sadd", setKey, "a"+key))
+	}
+	for i := 0; i < 3; i++ {
+		key := string(rune(i))
+		testDB.Exec(nil, utils.ToCmdLine("sadd", setKey, "b"+key))
+	}
+
+	result := testDB.Exec(nil, utils.ToCmdLine("sscan", setKey, "0", "count", "10"))
+	cursorStr := string(result.(*protocol.MultiRawReply).Replies[0].(*protocol.BulkReply).Arg)
+	cursor, err := strconv.Atoi(cursorStr)
+	if err == nil {
+		if cursor != 0 {
+			t.Errorf("expect cursor 0, actually %d", cursor)
+			return
+		}
+	} else {
+		t.Errorf("get scan result error")
+		return
+	}
+
+	// test sscan 0 match a*
+	result = testDB.Exec(nil, utils.ToCmdLine("sscan", setKey, "0", "match", "a*"))
+	returnKeys := result.(*protocol.MultiRawReply).Replies[1].(*protocol.MultiBulkReply).Args
+	for i := range returnKeys {
+		key := string(returnKeys[i])
+		if key[0] != 'a' {
+			t.Errorf("The key %s should match a*", key)
+			return
+		}
+	}
 }

@@ -1,9 +1,10 @@
 package dict
 
 import (
-	"github.com/hdt3213/godis/lib/utils"
 	"sort"
 	"testing"
+
+	"github.com/hdt3213/godis/lib/utils"
 )
 
 func TestSimpleDict_Keys(t *testing.T) {
@@ -50,6 +51,33 @@ func TestSimpleDict_PutIfExists(t *testing.T) {
 	}
 	if v, _ := d.Get(key); v != val {
 		t.Error("wrong value")
+		return
+	}
+}
+
+func TestSimpleDict_Scan(t *testing.T) {
+	d := MakeSimple()
+	size := 10
+	for i := 0; i < size; i++ {
+		str := "a" + utils.RandString(5)
+		d.Put(str, []byte(str))
+	}
+	keys, nextCursor := d.DictScan(0, size, "*")
+	if len(keys) != size*2 {
+		t.Errorf("expect %d keys, actual: %d", size*2, len(keys))
+		return
+	}
+	if nextCursor != 0 {
+		t.Errorf("expect 0, actual: %d", nextCursor)
+		return
+	}
+	for i := 0; i < size; i++ {
+		str := "b" + utils.RandString(5)
+		d.Put(str, str)
+	}
+	keys, _ = d.DictScan(0, size*2, "a*")
+	if len(keys) != size*2 {
+		t.Errorf("expect %d keys, actual: %d", size*2, len(keys))
 		return
 	}
 }

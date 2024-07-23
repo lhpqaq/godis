@@ -518,6 +518,9 @@ func execHScan(db *DB, args [][]byte) redis.Reply {
 			}
 		}
 	}
+	if len(args) < 2 {
+		return &protocol.SyntaxErrReply{}
+	}
 	key := string(args[0])
 	// get entity
 	dict, errReply := db.getAsDict(key)
@@ -527,7 +530,6 @@ func execHScan(db *DB, args [][]byte) redis.Reply {
 	if dict == nil {
 		return &protocol.NullBulkReply{}
 	}
-
 	cursor, err := strconv.Atoi(string(args[1]))
 	if err != nil {
 		return protocol.MakeErrReply("ERR invalid cursor")

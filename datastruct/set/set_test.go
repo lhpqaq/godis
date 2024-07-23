@@ -3,6 +3,8 @@ package set
 import (
 	"strconv"
 	"testing"
+
+	"github.com/hdt3213/godis/lib/utils"
 )
 
 func TestSet(t *testing.T) {
@@ -28,5 +30,32 @@ func TestSet(t *testing.T) {
 		if ok {
 			t.Error("expected false actual true, key: " + strconv.Itoa(i))
 		}
+	}
+}
+
+func TestSetScan(t *testing.T) {
+	set := Make()
+	size := 10
+	for i := 0; i < size; i++ {
+		str := "a" + utils.RandString(5)
+		set.Add(str)
+	}
+	keys, nextCursor := set.SetScan(0, size, "*")
+	if len(keys) != size {
+		t.Errorf("expect %d keys, actual: %d", size, len(keys))
+		return
+	}
+	if nextCursor != 0 {
+		t.Errorf("expect 0, actual: %d", nextCursor)
+		return
+	}
+	for i := 0; i < size; i++ {
+		str := "b" + utils.RandString(5)
+		set.Add(str)
+	}
+	keys, _ = set.SetScan(0, size*2, "a*")
+	if len(keys) != size {
+		t.Errorf("expect %d keys, actual: %d", size, len(keys))
+		return
 	}
 }
